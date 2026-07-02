@@ -1,0 +1,46 @@
+{
+  "skill_name": "work-backstory",
+  "evals": [
+    {
+      "id": 1,
+      "name": "mid-arc-capture-no-commit",
+      "prompt": "I'm chasing a flaky test in our checkout service — checkout.spec.ts randomly fails ~5% of CI runs with 'ECONNRESET' calling the payments client. I've already tried two things that didn't work: (1) bumping the HTTP timeout from 5s to 15s — still failed just as often; (2) wrapping the call in a retry-with-backoff — that made it worse, we started seeing occasional double-charges so I reverted it. Before I change anything else, help me nail the root cause. My current hunch is the HTTP connection pool being shared across worker threads, but I'm not certain. Repo is the current directory.",
+      "expected_output": "A work-backstory entry exists capturing the arc WITHOUT any git commit. Process log records both rejected approaches with reasons + the connection-pool hunch.",
+      "files": [],
+      "assertions": [
+        {"id": "work-backstory-created", "description": "A docs/work-backstory/*.md entry was created in the repo"},
+        {"id": "captured-without-commit", "description": "The work-backstory was produced with NO git commit happening (verified via NOTE.md + no commits in the scratch repo)"},
+        {"id": "process-records-both-rejections", "description": "Process log records BOTH rejected approaches AND why each failed (timeout bump = no effect; retry wrapper = caused double-charges, reverted)"},
+        {"id": "process-records-hunch", "description": "The connection-pool-sharing hunch is captured as a working hypothesis"},
+        {"id": "not-routine-progress-only", "description": "Entry is decision/reasoning-oriented, not a list of routine edits"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "arc-start-intent-density",
+      "prompt": "We need idempotency keys on our webhook ingestion — Stripe keeps retrying delivered events and we're double-processing some of them, which double-fired a few customer emails last week. Boss wants it shipped by Friday. The ingestion lives in services/webhooks/. Start by sketching the approach with me.",
+      "expected_output": "Worklog stubbed at arc start with a dense, specific Intent naming the real problem + why-now, not a generic title.",
+      "files": [],
+      "assertions": [
+        {"id": "work-backstory-created", "description": "A docs/work-backstory/*.md entry was created"},
+        {"id": "intent-names-concrete-problem", "description": "Intent names the concrete problem: double-processing from Stripe retries, with the real symptom (double-fired customer emails)"},
+        {"id": "intent-names-why-now", "description": "Intent includes a why-now driver (Friday deadline and/or last-week incident)"},
+        {"id": "intent-not-generic", "description": "Intent is specific, not a bare generic title like 'add idempotency to webhooks'"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "anti-brag-density",
+      "prompt": "The cache migration is done and deployed — write up the work-backstory. We moved the feature-flag service from Redis to a local in-process LRU cache because the Redis round-trip was dominating p99 latency (18ms → 2ms after the switch). The hard part was invalidation on config writes: first attempt used a 30s TTL and caused stale flags for up to half a minute; we landed on explicit invalidation via a pub/sub message. Also nearly shipped a bug where the cache wasn't shared across worker processes and each worker had its own stale copy.",
+      "expected_output": "A dense work-backstory: real numbers, TTL rejected with reason, pub/sub decision, worker-process gotcha as a Lesson. Minimal generic praise.",
+      "files": [],
+      "assertions": [
+        {"id": "contains-p99-numbers", "description": "The 18ms→2ms p99 numbers appear"},
+        {"id": "ttl-rejection-reasoned", "description": "The TTL approach is recorded as REJECTED with the ~30s stale-flags reason"},
+        {"id": "pubsub-decision-captured", "description": "The explicit pub/sub invalidation decision is captured"},
+        {"id": "worker-gotcha-as-lesson", "description": "The worker-process-not-sharing bug is captured as a forward-useful Lesson/gotcha"},
+        {"id": "low-generic-praise", "description": "Minimal generic praise language; content is decision-useful rather than celebratory"}
+      ]
+    }
+  ]
+}
