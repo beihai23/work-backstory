@@ -60,7 +60,7 @@ Then restart Claude Code. The skill engages on its own — at the start of subst
 
 ## Status
 
-v0.3. The behavior-guidance was validated in iteration-1 evals: with the skill, Claude creates a durable `docs/work-backstory/` entry where baseline produces only ephemeral notes — and an entry was captured with **zero commits** in the repo. Hooks are intentionally **not yet wired** (the `PreCompact` flush is the highest-value one; it'll be added targeted once testing shows where behavior alone misses). See `evals/` for the test cases.
+v0.3. The behavior-guidance was validated in iteration-1 evals: with the skill, Claude creates a durable `docs/work-backstory/` entry where baseline produces only ephemeral notes — and an entry was captured with **zero commits** in the repo. A **`PreCompact` hook is wired** (in the skill's frontmatter, so it travels with the skill and fires for anyone who installs it): it appends a one-line compaction checkpoint to the active entry's Process — provenance for where the conversation was summarized. Per the Claude Code hooks reference, `PreCompact` can only block/allow compaction — it **can't** inject context to trigger a pre-compaction flush — so the real anti-loss guarantee is the skill's *continuous* capture above, not the hook. A `UserPromptSubmit` reminder or a `PostCompact` summary-persist hook can be added later if testing shows misses. See `evals/` for the test cases.
 
 ## License
 

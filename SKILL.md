@@ -14,6 +14,11 @@ description: |
   never names it. Also proactively consult it when the user asks "why did we build
   X this way", "what's the backstory here", or — in Chinese — "这段代码的来龙去脉",
   or wants context before changing code in a tracked area. (gstack-style)
+hooks:
+  PreCompact:
+    - hooks:
+        - type: command
+          command: "bash ${CLAUDE_SKILL_DIR}/bin/on-compact.sh"
 ---
 
 # work-backstory — the 来龙去脉 of how the codebase evolves
@@ -200,20 +205,33 @@ not backfill arcs from before the skill existed.
 - **Before a non-trivial change**: check for a related entry — its Decisions and
   Lessons may change your approach.
 
-## Reliability layer (hooks) — to be wired after behavior is validated
+## Reliability layer (hooks)
 
-The behavior above is the primary mechanism: it works whenever this skill is
-active. Hooks are a *determinism backstop*, not the capture mechanism, and they
-introduce noise and coupling — so they are added targeted, not speculatively.
-Once testing shows where the behavior-guidance alone tends to miss, wire these:
+The behavior above is the primary mechanism — it works whenever this skill is
+active, and iteration-1 showed it captures well. Hooks are a backstop, and a hook
+can only do what the Claude Code hooks API allows.
 
-- **PreCompact** (highest value) — force a Process flush before context
-  compaction. This is the hard anti-loss guarantee; if only one hook ships, it is
-  this one.
-- **SessionStart** — surface an active arc on entry, so the skill engages without
-  an explicit prompt.
-- *Lighter, optional*: a git-commit injection reminding Claude to add the
-  `Backstory:` pointer and keep the message substantive; a Stop-hook flush.
+**One hard limit, learned from the hooks reference:** the `PreCompact` event can
+only *block or allow* compaction — it **cannot inject Claude-readable context**.
+So a hook cannot make Claude "flush right before compaction"; by the time
+compaction fires, capture had to already happen during the turn. This is exactly
+why the anti-loss guarantee is the skill's *continuous* capture (moments 1–2
+above), not a pre-compaction scramble — and that continuous capture is what the
+evals validate.
+
+What is wired (in this skill's frontmatter, so it travels with the skill and is
+active whenever the skill is):
+
+- **PreCompact** — when an active (non-resolved) entry exists, append a one-line
+  *compaction checkpoint* to its Process section (e.g. *_[context compacted
+  (auto)]_*). This is provenance: a future reader sees where the conversation was
+  summarized. It does **not** block, so auto-compaction is never disrupted, and it
+  no-ops outside a repo or when no arc is active.
+
+If future testing shows Claude missing captures mid-arc, the stronger
+reinforcement is a `UserPromptSubmit` hook that reminds Claude at the start of
+each turn to keep the active entry's Process current — non-blocking, once per
+turn. Not wired yet; add it targeted if needed.
 
 The commit-message side of the double link is handled by the skill's behavior
 (add the `Backstory: docs/work-backstory/<slug>.md` line to commit messages on a
