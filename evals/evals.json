@@ -41,6 +41,21 @@
         {"id": "worker-gotcha-as-lesson", "description": "The worker-process-not-sharing bug is captured as a forward-useful Lesson/gotcha"},
         {"id": "low-generic-praise", "description": "Minimal generic praise language; content is decision-useful rather than celebratory"}
       ]
+    },
+    {
+      "id": 4,
+      "name": "expected-actual-divergence",
+      "prompt": "We need rate limiting on our public API — enforce '100 requests/min per user' globally. My first instinct is a fixed-window counter per user (increment in Redis, reset each minute); I've used it before and it's simple. Before I build it, pressure-test the design with me. Context that matters: the API is stateless pods behind a load balancer, ~50 replicas, no sticky sessions, so the limit has to hold across all pods, not per-instance. I also briefly considered a distributed Redis lock per user to coordinate the replicas, but it felt heavy and I'm not sure it's warranted. Boss wants it shipped this week. Repo is the current directory.",
+      "expected_output": "A work-backstory entry capturing this design arc. Records the initial expectation (fixed-window counter), how the multi-pod/global constraint corrected that assumption, the distributed-lock idea as rejected over-engineering with a reason, and EXPLICITLY the divergence between the initial expectation and the final landed approach. The entry exists even at design stage with no commit yet.",
+      "files": [],
+      "assertions": [
+        {"id": "work-backstory-created", "description": "A docs/work-backstory/*.md entry was created"},
+        {"id": "records-initial-expectation", "description": "The fixed-window-counter assumption is recorded as the starting expectation (not silently erased once superseded)"},
+        {"id": "records-constraint-correction", "description": "How the stateless / multi-pod / global-enforcement constraint corrected or complicated the initial assumption is captured"},
+        {"id": "rejected-overengineering-reasoned", "description": "The distributed-lock idea is recorded as REJECTED with a reason (heavy / unwarranted / YAGNI)"},
+        {"id": "records-expected-actual-divergence", "description": "The final decision's divergence from the initial expectation is explicitly recorded — the landed approach differs from the original fixed-window-per-user, and why"},
+        {"id": "design-arc-without-commit", "description": "The entry exists even though this is a design-stage arc that has produced no commit yet"}
+      ]
     }
   ]
 }

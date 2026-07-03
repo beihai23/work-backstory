@@ -39,7 +39,7 @@ status: draft   # draft | active | resolved
 commits: []     # checkpoints inside the arc
 ---
 
-## Intent      ← the departure: what problem, why now
+## Intent      ← the departure: what problem, why now, and the initial expectation (应然)
 ## Process     ← living log; append in-the-moment, flush before compaction
 ## Decisions   ← distilled from Process
 ## Lessons     ← distilled from Process; forward-useful gotchas

@@ -140,8 +140,11 @@ commits: []     # SHAs as they land — checkpoints inside the arc
 # <imperative title — what this arc is about>
 
 ## Intent
-<the departure: what problem brought us here, and why now. A future reader
-should grasp this before reading any code.>
+<the departure: what problem brought us here, why now, and the initial
+expectation (应然) — the approach you assumed would work, the shape you
+thought the solution would take. Process later records how the actual diverged
+from this expectation; that divergence is the entry's most forward-useful
+part. A future reader should grasp this before reading any code.>
 
 ## Process   ← the living log; append in-the-moment, flush before compaction
 - <decision / rejection / surprise / constraint — one bullet per valuable thing,
@@ -184,9 +187,13 @@ resuming the most recent active entry over spawning a duplicate.
 Finalize: distill Process into Decisions and Lessons, set `status: resolved`,
 record the final commits, and ensure the entry is committed — even if the arc
 produced no code (a docs-only commit landing the entry is fine, and *"we decided
-not to do X, here's why"* entries are often the most valuable to preserve). If
-the session ends mid-arc, flush Process so it survives and leave `status: active`
-for resumption — do not force a resolution.
+not to do X, here's why"* entries are often the most valuable to preserve). As
+you distill, explicitly contrast the final Decisions against the Intent's initial
+expectation — where the actual diverged from what you expected, and why. That
+expected-vs-actual gap is what a future reader most needs to calibrate their own
+judgment; recording it is the point of having written the expectation down in
+the first place. If the session ends mid-arc, flush Process so it survives and
+leave `status: active` for resumption — do not force a resolution.
 
 ## Only inside a repo
 
