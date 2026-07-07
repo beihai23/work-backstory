@@ -1,19 +1,14 @@
 ---
 name: work-backstory
-version: 0.3.0
+version: 0.4.0
 description: |
-  Capture *how the codebase actually evolves* — the why, the decisions, the
-  rejected approaches, the gotchas — into a durable in-repo backstory, written *as
-  the work happens* (during the conversation), not deferred to commit time. One
-  entry per problem-solving arc (which may span sessions, branches, and commits —
-  or none at all), bidirectionally linked to git commits. The goal is forward
-  reference for the next reader, not a record of accomplishment. Use this
-  whenever engaging a substantive problem or change — at the start of work, as
-  valuable decisions/surprises/rejections occur mid-conversation, before context
-  gets compacted, when committing, and when an arc resolves — even if the user
-  never names it. Also proactively consult it when the user asks "why did we build
-  X this way", "what's the backstory here", or — in Chinese — "这段代码的来龙去脉",
-  or wants context before changing code in a tracked area. (gstack-style)
+  Use when Claude Code is working in a git repo on any substantive code, docs,
+  debugging, design, review, or architecture task where decisions, rejected
+  approaches, surprises, or constraints should survive beyond the conversation.
+  Also use when the user asks for rationale, "why did we build X this way",
+  "what's the backstory here", "what changed and why", "来龙去脉", or context
+  before changing tracked code. Skip trivial lookups, pure status checks, and
+  non-repo work. (gstack-style)
 hooks:
   PreCompact:
     - hooks:
@@ -226,19 +221,25 @@ why the anti-loss guarantee is the skill's *continuous* capture (moments 1–2
 above), not a pre-compaction scramble — and that continuous capture is what the
 evals validate.
 
-What is wired (in this skill's frontmatter, so it travels with the skill and is
-active whenever the skill is):
+What is wired:
 
+- **Plugin `UserPromptSubmit` hook** — when this repository is installed as a
+  Claude Code plugin (or auto-loaded from `~/.claude/skills/work-backstory/` with
+  its `.claude-plugin/plugin.json`), `hooks/hooks.json` injects a short
+  Claude-readable reminder at the start of each user turn inside a git repo. This
+  fixes the observed gap where the skill was visible in Claude Code's
+  available-skill list but Claude did not select it during normal conversation.
+  The reminder is intentionally small and conditional; trivial/status-only turns
+  should still be skipped.
 - **PreCompact** — when an active (non-resolved) entry exists, append a one-line
   *compaction checkpoint* to its Process section (e.g. *_[context compacted
   (auto)]_*). This is provenance: a future reader sees where the conversation was
   summarized. It does **not** block, so auto-compaction is never disrupted, and it
   no-ops outside a repo or when no arc is active.
 
-If future testing shows Claude missing captures mid-arc, the stronger
-reinforcement is a `UserPromptSubmit` hook that reminds Claude at the start of
-each turn to keep the active entry's Process current — non-blocking, once per
-turn. Not wired yet; add it targeted if needed.
+If future testing shows the reminder firing too broadly, narrow
+`bin/on-user-prompt.sh` or the plugin hook in `hooks/hooks.json` rather than
+weakening the core skill instructions.
 
 The commit-message side of the double link is handled by the skill's behavior
 (add the `Backstory: docs/work-backstory/<slug>.md` line to commit messages on a

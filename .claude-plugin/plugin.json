@@ -1,0 +1,18 @@
+{
+  "name": "work-backstory",
+  "description": "Claude Code hooks that reinforce the work-backstory skill during substantive git-repo work.",
+  "version": "0.4.0",
+  "author": {
+    "name": "wangzhigang"
+  },
+  "homepage": "https://github.com/beihai23/work-backstory",
+  "repository": "https://github.com/beihai23/work-backstory",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "hooks",
+    "git",
+    "documentation",
+    "backstory"
+  ]
+}

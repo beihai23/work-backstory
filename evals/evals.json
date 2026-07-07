@@ -56,6 +56,21 @@
         {"id": "records-expected-actual-divergence", "description": "The final decision's divergence from the initial expectation is explicitly recorded — the landed approach differs from the original fixed-window-per-user, and why"},
         {"id": "design-arc-without-commit", "description": "The entry exists even though this is a design-stage arc that has produced no commit yet"}
       ]
+    },
+    {
+      "id": 5,
+      "name": "conversation-selection-reinforcement",
+      "prompt": "We need idempotency keys on our webhook ingestion. Stripe keeps retrying delivered events and we're double-processing some of them, which double-fired customer emails last week. Boss wants it shipped by Friday. The ingestion lives in services/webhooks/. Start by sketching the approach with me.",
+      "expected_output": "Claude invokes the work-backstory Skill before normal design work, then creates or resumes a docs/work-backstory entry for this arc. The entry captures the concrete Stripe retry problem, the double-email symptom, and the Friday deadline as why-now context.",
+      "files": [],
+      "assertions": [
+        {"id": "prompt-submit-reminder-present", "description": "A UserPromptSubmit reminder from the companion plugin is present before the model decides whether to use skills"},
+        {"id": "skill-tool-invoked", "description": "The transcript shows work-backstory was invoked through the Skill tool before substantive design advice"},
+        {"id": "work-backstory-created", "description": "A docs/work-backstory/*.md entry was created or an active matching entry was resumed"},
+        {"id": "intent-names-concrete-problem", "description": "Intent names Stripe retries causing double-processing and double-fired customer emails"},
+        {"id": "intent-names-why-now", "description": "Intent includes the Friday deadline as why-now context"},
+        {"id": "not-just-available", "description": "Claude does more than mention that work-backstory is available; it actually applies the skill behavior"}
+      ]
     }
   ]
 }

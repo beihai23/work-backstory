@@ -56,11 +56,20 @@ The enemy isn't specific words — it's **thinness**. A line full of real decisi
 git clone https://github.com/beihai23/work-backstory ~/.claude/skills/work-backstory
 ```
 
-Then restart Claude Code. The skill engages on its own — at the start of substantive work, mid-conversation as decisions happen, before context compaction, at commit, and at arc resolution. You don't have to invoke it by name. To consult past entries, just ask *"这段代码的来龙去脉?"*
+Then restart Claude Code. For a publishable install, register this repo as a marketplace and install the plugin:
+
+```bash
+/plugin marketplace add https://github.com/beihai23/work-backstory
+/plugin install work-backstory@work-backstory-marketplace
+```
+
+If you only want the standalone skill, installing the repo under `~/.claude/skills/work-backstory` makes the skill available. The marketplace/plugin path is what loads the companion hooks from `.claude-plugin/plugin.json` and `hooks/hooks.json`, which is what nudges Claude at the start of each turn to invoke `work-backstory` for substantive repo work. To consult past entries, just ask *"这段代码的来龙去脉?"*
 
 ## Status
 
-v0.3. The behavior-guidance was validated in iteration-1 evals: with the skill, Claude creates a durable `docs/work-backstory/` entry where baseline produces only ephemeral notes — and an entry was captured with **zero commits** in the repo. A **`PreCompact` hook is wired** (in the skill's frontmatter, so it travels with the skill and fires for anyone who installs it): it appends a one-line compaction checkpoint to the active entry's Process — provenance for where the conversation was summarized. Per the Claude Code hooks reference, `PreCompact` can only block/allow compaction — it **can't** inject context to trigger a pre-compaction flush — so the real anti-loss guarantee is the skill's *continuous* capture above, not the hook. A `UserPromptSubmit` reminder or a `PostCompact` summary-persist hook can be added later if testing shows misses. See `evals/` for the test cases.
+v0.4. The behavior-guidance was validated in iteration-1 evals: with the skill, Claude creates a durable `docs/work-backstory/` entry where baseline produces only ephemeral notes — and an entry was captured with **zero commits** in the repo. v0.4 adds a companion **Claude Code plugin hook** because skill registration alone only makes `work-backstory` available; Claude still has to choose the `Skill` tool during conversation. The plugin's `UserPromptSubmit` hook injects a short reminder inside git repos to use the skill for substantive work and skip trivial/status-only turns. The repository now ships a `.claude-plugin/marketplace.json` so it can be added and installed as a marketplace-backed plugin.
+
+A **`PreCompact` hook is also wired**: it appends a one-line compaction checkpoint to the active entry's Process — provenance for where the conversation was summarized. Per the Claude Code hooks reference, `PreCompact` can only block/allow compaction — it **can't** inject context to trigger a pre-compaction flush — so the real anti-loss guarantee is still the skill's continuous capture, reinforced by the prompt-submit reminder. See `evals/` for the test cases.
 
 ## License
 
