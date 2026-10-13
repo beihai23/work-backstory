@@ -1,6 +1,6 @@
 ---
 name: work-backstory
-version: 0.4.0
+version: 0.5.0
 description: |
   Use when Claude Code is working in a git repo on any substantive code, docs,
   debugging, design, review, or architecture task where decisions, rejected
@@ -111,13 +111,15 @@ itself substantive, not a bare `update`.
 
 ## The entry
 
-Stored at `docs/work-backstory/<slug>.md`, committed in-repo. One file per arc;
-the slug comes from the feature or problem.
+Stored at `docs/work-backstory/<slug>.md`, committed in-repo — riding inside
+the arc's code commits rather than in separate docs follow-ups (see "One
+commit, not two"). One file per arc; the slug comes from the feature or
+problem.
 
 **Language: write the entry's content in Chinese (中文) by default** — the Intent,
 Process, Decisions, and Lessons prose. The user works in Chinese, and a backstory
 that won't get re-read is pointless, so it should read naturally to them. Keep the
-frontmatter keys (`arc`, `started`, `status`, `commits`) and the section headers as
+frontmatter keys (`arc`, `started`, `status`) and the section headers as
 structural labels. Only switch to English when there's a real reason (an
 English-only repo, or an entry meant for a wider team) — and then write the *whole*
 entry in that language, not a mix.
@@ -127,9 +129,8 @@ Structure:
 ```markdown
 ---
 arc: <slug>
-started: <HEAD sha when the arc began — the "before" snapshot>
+started: <HEAD sha when the arc began — write once; the "before" snapshot>
 status: draft   # draft | active | resolved
-commits: []     # SHAs as they land — checkpoints inside the arc
 ---
 
 # <imperative title — what this arc is about>
@@ -143,11 +144,14 @@ part. A future reader should grasp this before reading any code.>
 
 ## Process   ← the living log; append in-the-moment, flush before compaction
 - <decision / rejection / surprise / constraint — one bullet per valuable thing,
-  with its reasoning. Anchor loosely to where in the arc it happened.>
+  with its reasoning. Anchor semantically ("after the pub/sub switch"), never by
+  commit SHA. A revision is recorded as the new decision plus why the old one
+  was overturned — a rejection — never as "changed it again".>
 
 ## Decisions   ← distilled from Process; the choices that shaped the outcome
 ## Lessons     ← distilled from Process; forward-useful gotchas & insights
-## Related     ← key commits, PRs, sibling arcs, relevant files/modules>
+## Related     ← PRs, sibling arcs, relevant files/modules. This arc's commits
+                  are derived, not stored: git log --grep='Backstory: docs/work-backstory/<slug>.md'
 ```
 
 Process is the substrate that guarantees completeness; Decisions and Lessons are
@@ -160,14 +164,43 @@ from memory, they end up substantive instead of thin.
 The connection between commits and the entry runs **both ways**, so you can
 arrive from either direction and find the other half:
 
-- **Commit message → entry:** every commit on a tracked arc carries
-  `Backstory: docs/work-backstory/<slug>.md` in its message.
-- **Entry → commits:** the entry records `started` (the merge-base / state before
-  the change) and `end` (the merge or squash commit).
+- **Commit message → entry:** every commit you make on a tracked arc carries
+  `Backstory: docs/work-backstory/<slug>.md` in its message. This is the one
+  live link: git-native, zero-maintenance, and it survives rebase and squash
+  because it travels in the message.
+- **Entry → commits:** the entry stores no commit SHAs. A commit cannot
+  contain its own hash, so a maintained SHA list would dirty the entry right
+  after every commit and pull toward a follow-up docs-only commit — an
+  infinite regress. Instead, recover the arc's commits on demand:
+  `git log --grep='Backstory: docs/work-backstory/<slug>.md'`. The entry keeps
+  only `started` (write-once) plus, in Related, stable identifiers that cannot
+  self-reference (a PR number, sibling arcs).
 
 Why bidirectional? Reading a commit, you can jump to the *why*. Reading a
 backstory, you can jump to the exact diff. One-directional links always leave you
 stranded on one side.
+
+## One commit, not two (ride-along)
+
+When you commit code on a tracked arc, stage the entry file in the **same**
+commit — `git add` it together with the code. The entry is a living document
+and is usually dirty by commit time, so riding along is the normal path, and it
+makes the `Backstory:` trailer self-consistent: the commit it points from
+contains the entry it points to.
+
+**Never land a separate docs-only follow-up commit mid-arc** ("update
+backstory", "sync entry") and never edit the entry just to record a commit
+SHA. Doubling every code commit with a docs commit buries the real work; it is
+the anti-pattern this rule exists to prevent. The only docs-only commit is the
+no-code resolution described under "When the arc resolves".
+
+A commit is never a capture trigger — write when thinking happens (a decision,
+a rejection, a surprise, a constraint), not when a git event happens. The
+commit trail is git's job; recover it with the `Backstory:` grep.
+
+Commits you don't make — the user committing manually outside the session —
+need no action: leave the entry dirty and let it ride with your next commit on
+that arc. Never create a commit just to flush the entry.
 
 ## Resuming an arc across sessions
 
@@ -179,16 +212,21 @@ resuming the most recent active entry over spawning a duplicate.
 
 ## When the arc resolves
 
-Finalize: distill Process into Decisions and Lessons, set `status: resolved`,
-record the final commits, and ensure the entry is committed — even if the arc
-produced no code (a docs-only commit landing the entry is fine, and *"we decided
-not to do X, here's why"* entries are often the most valuable to preserve). As
-you distill, explicitly contrast the final Decisions against the Intent's initial
-expectation — where the actual diverged from what you expected, and why. That
-expected-vs-actual gap is what a future reader most needs to calibrate their own
-judgment; recording it is the point of having written the expectation down in
-the first place. If the session ends mid-arc, flush Process so it survives and
-leave `status: active` for resumption — do not force a resolution.
+Finalize **before** the closing commit, then let the entry ride with it:
+distill Process into Decisions and Lessons, set `status: resolved`, `git add`
+the entry, and make the final code commit on the arc — its `Backstory:` trailer
+closes the loop, and `git log --grep='Backstory:'` recovers the full commit
+set afterwards. If the arc resolves with **no code commit to ride with** —
+pure design, or a decision not to act — that is the one case where a docs-only
+commit is correct: land the finalized entry as its own commit, still with the
+`Backstory:` trailer (*"we decided not to do X, here's why"* entries are often
+the most valuable to preserve). As you distill, explicitly contrast the final
+Decisions against the Intent's initial expectation — where the actual diverged
+from what you expected, and why. That expected-vs-actual gap is what a future
+reader most needs to calibrate their own judgment; recording it is the point of
+having written the expectation down in the first place. If the session ends
+mid-arc, flush Process so it survives and leave `status: active` for
+resumption — do not force a resolution.
 
 ## Only inside a repo
 
@@ -241,7 +279,9 @@ If future testing shows the reminder firing too broadly, narrow
 `bin/on-user-prompt.sh` or the plugin hook in `hooks/hooks.json` rather than
 weakening the core skill instructions.
 
-The commit-message side of the double link is handled by the skill's behavior
-(add the `Backstory: docs/work-backstory/<slug>.md` line to commit messages on a
-tracked arc). A native `prepare-commit-msg` git hook can be layered later if
-testing shows the pointer going missing.
+The commit side of the double link is handled by the skill's behavior: on a
+tracked arc, stage the entry into the same commit as the code and add the
+`Backstory: docs/work-backstory/<slug>.md` line to its message. A native
+`prepare-commit-msg` git hook in the target repo could be layered later if
+testing shows the trailer or the ride-along going missing; none is installed
+today.

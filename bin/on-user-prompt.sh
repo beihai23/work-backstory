@@ -11,5 +11,5 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 [ -z "$ROOT" ] && exit 0
 
 cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"<work-backstory-reminder>\nIf this turn starts or continues substantive work in this git repo, invoke the work-backstory Skill before acting. Keep docs/work-backstory/<slug>.md current with decisions, rejected approaches, surprises, and constraints as they happen; skip trivial lookups, pure status checks, and non-repo work.\n</work-backstory-reminder>"}}
+{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"<work-backstory-reminder>\nIf this turn starts or continues substantive work in this git repo, invoke the work-backstory Skill before acting. Keep docs/work-backstory/<slug>.md current with decisions, rejected approaches, surprises, and constraints as they happen; skip trivial lookups, pure status checks, and non-repo work. When you commit code on a tracked arc, stage the entry into the SAME commit (git add docs/work-backstory/<slug>.md) and include the Backstory: trailer in the message — never a separate docs-only follow-up commit, and never edit the entry just to record a SHA.\n</work-backstory-reminder>"}}
 JSON

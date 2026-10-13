@@ -27,7 +27,7 @@ Three capture moments, none of which depend on git:
 2. **As valuable things happen** — append to the Process log the moment a decision is made, an approach is tried and rejected, a surprise surfaces, or a constraint emerges.
 3. **Before context is compacted** — flush still-unrecorded process into the entry *before* the compaction throws it away. This is the hard safety net that guarantees nothing valuable is lost.
 
-Entries live in-repo at `docs/work-backstory/<slug>.md`, committed, and are **bidirectionally linked** to git: commit messages carry a `Backstory:` pointer; the entry records its start/end commits.
+Entries live in-repo at `docs/work-backstory/<slug>.md` and are **bidirectionally linked** to git. The link is deliberately asymmetric: commits on a tracked arc carry a `Backstory:` pointer in their message (stored — git-native, rebase-safe), while the arc's commits are recovered on demand via `git log --grep='Backstory:'` (derived — an entry can't contain the hash of the commit that carries it). The entry also **rides along**: when Claude commits code on a tracked arc, the current entry is staged into the *same* commit, so one commit carries the change and its thinking together. No separate docs-only follow-up commits mid-arc; the only docs-only commit is an arc that resolves with no code at all (design-only, or *"we decided not to do X"* — often the most valuable entry of all).
 
 ### Entry structure
 
@@ -36,14 +36,13 @@ Entries live in-repo at `docs/work-backstory/<slug>.md`, committed, and are **bi
 arc: <slug>
 started: <HEAD sha when the arc began>
 status: draft   # draft | active | resolved
-commits: []     # checkpoints inside the arc
 ---
 
 ## Intent      ← the departure: what problem, why now, and the initial expectation (应然)
 ## Process     ← living log; append in-the-moment, flush before compaction
 ## Decisions   ← distilled from Process
 ## Lessons     ← distilled from Process; forward-useful gotchas
-## Related     ← commits, PRs, sibling arcs, files
+## Related     ← PRs, sibling arcs, files; this arc's commits: git log --grep='Backstory:'
 ````
 
 ### Writing discipline (anti-表功)
@@ -70,6 +69,8 @@ If you only want the standalone skill, installing the repo under `~/.claude/skil
 v0.4. The behavior-guidance was validated in iteration-1 evals: with the skill, Claude creates a durable `docs/work-backstory/` entry where baseline produces only ephemeral notes — and an entry was captured with **zero commits** in the repo. v0.4 adds a companion **Claude Code plugin hook** because skill registration alone only makes `work-backstory` available; Claude still has to choose the `Skill` tool during conversation. The plugin's `UserPromptSubmit` hook injects a short reminder inside git repos to use the skill for substantive work and skip trivial/status-only turns. The repository now ships a `.claude-plugin/marketplace.json` so it can be added and installed as a marketplace-backed plugin.
 
 A **`PreCompact` hook is also wired**: it appends a one-line compaction checkpoint to the active entry's Process — provenance for where the conversation was summarized. Per the Claude Code hooks reference, `PreCompact` can only block/allow compaction — it **can't** inject context to trigger a pre-compaction flush — so the real anti-loss guarantee is still the skill's continuous capture, reinforced by the prompt-submit reminder. See `evals/` for the test cases.
+
+**v0.5 — ride-along commits and a derived reverse link.** The entry rides inside the arc's own code commits: `git add` the entry together with the code, one commit carries both, and its `Backstory:` trailer is self-consistent. Separate docs-only follow-up commits mid-arc are an explicit anti-pattern; the only docs-only commit is a resolved arc that produced no code. The old `commits:` frontmatter list is gone — a commit can't contain its own SHA, and maintaining that list is what caused the follow-up-commit churn — so the entry→commits direction is now derived via `git log --grep='Backstory:'`, with the recipe embedded in the entry template.
 
 ## License
 

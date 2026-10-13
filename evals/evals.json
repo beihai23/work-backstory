@@ -71,6 +71,22 @@
         {"id": "intent-names-why-now", "description": "Intent includes the Friday deadline as why-now context"},
         {"id": "not-just-available", "description": "Claude does more than mention that work-backstory is available; it actually applies the skill behavior"}
       ]
+    },
+    {
+      "id": 6,
+      "name": "ride-along-single-commit",
+      "prompt": "Step 1 of our sharding rollout for the job queue: workers currently pull jobs in insertion order, but shard assignment will need lexicographic order by (priority, job_id). Implement the sort key in services/queue/worker.py, update the call sites, and commit this step now — the sharding itself lands next week, so this arc continues. Background you should not lose: we briefly tried hashing the job_id into the sort key and dropped it because it broke the FIFO guarantee within equal priorities. Repo is the current directory.",
+      "expected_output": "The step-1 code change and its work-backstory entry land together in ONE commit on the tracked arc: the commit that changes worker.py also contains docs/work-backstory/<slug>.md (git show --stat lists both) and its message carries the Backstory: trailer. The entry stays active (the arc continues next week) and records the rejected hash-the-key approach. No separate docs-only commit exists, and the entry frontmatter keeps no maintained commits/SHA list.",
+      "files": [],
+      "assertions": [
+        {"id": "work-backstory-created", "description": "A docs/work-backstory/*.md entry was created in the repo"},
+        {"id": "entry-in-same-commit", "description": "The code commit that changes the worker code ALSO contains docs/work-backstory/<slug>.md in the SAME commit — git show --stat of that commit lists both the code file and the entry"},
+        {"id": "no-docs-only-followup-commit", "description": "No separate docs-only commit exists — git log in the scratch repo shows exactly one commit for this step, not a code commit followed by a backstory commit"},
+        {"id": "backstory-trailer-present", "description": "The code commit message carries the 'Backstory: docs/work-backstory/<slug>.md' trailer"},
+        {"id": "no-sha-chasing-in-entry", "description": "The entry frontmatter has arc/started/status only — no maintained commits list, and no edit made solely to record the code commit's SHA"},
+        {"id": "rejection-captured", "description": "The entry's Process records the rejected hash-the-job_id sort key with the broke-FIFO-within-equal-priorities reason"},
+        {"id": "entry-stays-active", "description": "The entry status is not forced to resolved — the arc explicitly continues (sharding lands next week)"}
+      ]
     }
   ]
 }
